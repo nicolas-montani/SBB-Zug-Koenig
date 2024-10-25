@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SBB Zug König</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+ <style>
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .question {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #f8f9fa;
+    }
+    .answers {
+      margin-bottom: 10px;
+    }
+    .progress {
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .completion-message {
+      text-align: center;
+      font-size: 24px;
+      color: #E30007;
+      margin: 40px 0;
+    }
+    .hidden {
+      display: none;
+    }
+    .submitButton {
+      background-color: #E30007 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class='container'>
+    <div class='header'>
+      <img src="SBB-Logo.png" width="100%" alt="">
+    </div>
+    
+    <!-- Quiz Container -->
+    <div id="quiz-container">
+      <div class="progress" id="progress"></div>
+      <div id="question-container"></div>
+    </div>
+
+    <!-- Response Form (Initially Hidden) -->
+    <form id='responseForm' class="hidden">
+      <input type="hidden" id='hiddenId' />     
+      <div class="input-field">
+        <label for="fullName">Vor- und Nachname</label>
+        <input type="text" id='fullName' required />
+      </div>
+      <div class="input-field">
+        <label for="message">Deine Antwort</label>
+        <textarea class="materialize-textarea" id='message' required></textarea>
+      </div>
+      <div class="input-field">
+        <label for="comment">Kommentar</label>
+        <input type="text" id='comment' />
+      </div>
+      <button class="waves-effect waves-light btn" type='submit'>Submit Response</button>
+    </form>
+
+    <!-- Responses List -->
+    <ul id='responses' class="collection"></ul>
+  </div>
+
+  <!-- JavaScript imports -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>  
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+ 
+  <script type="module" src="app.js"></script>
+</body>
+</html>
+
