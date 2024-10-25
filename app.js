@@ -255,26 +255,11 @@ function showResponseForm() {
     document.getElementById('quiz-container').classList.add('hidden');
     document.getElementById('responseForm').classList.remove('hidden');
     
-    // Add a "Show Answers" button
-    const showAnswersButton = document.createElement('button');
-    showAnswersButton.className = 'waves-effect waves-light btn';
-    showAnswersButton.textContent = 'Show Answers';
-    showAnswersButton.onclick = () => {
-        const messageElement = document.getElementById('message');
-        messageElement.value = formatQuizResponses();
-        messageElement.setAttribute('readonly', true); // Make the textarea readonly
-        Materialize.updateTextFields();
-    };
-
-    const responseForm = document.getElementById('responseForm');
-    responseForm.appendChild(showAnswersButton);
-
-    // Add event listener for Enter key
-    showAnswersButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            showAnswersButton.click();
-        }
-    });
+    // Directly show answers
+    const messageElement = document.getElementById('message');
+    messageElement.value = formatQuizResponses();
+    messageElement.setAttribute('readonly', true); // Make the textarea readonly
+    Materialize.updateTextFields();
 }
 
 function formatQuizResponses() {
@@ -326,7 +311,7 @@ function showThankYouMessage() {
         <div class="completion-message">
             Vielen Dank für deine Teilnahme!
             <br><br>
-            <button class="waves-effect waves-light btn" onclick="location.reload()">Neu starten</button>
+            <button class="waves-effect waves-light btn red" onclick="location.reload()">Neu starten</button>
         </div>
     `;
 }
