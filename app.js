@@ -23,7 +23,7 @@ const responsesRef = ref(db, 'responses');
 const questions = [
     {
         id: 1,
-        text: "In welchem Umlauf-Zug hat sich ein Defekt erreignet? (Ex: 712-1)",
+        text: "In welchem Umlauf hat sich ein Defekt ereignet? (z.B.: 712-1)",
         type: "regular",
         answers: [
             "Manuell eingeben"
@@ -31,32 +31,27 @@ const questions = [
     },
     {
         id: 2,
-        text: "Was ist die Serienummer des kaputten Wagen? (Ex: 50 85 26-94 901-3)",
+        text: "Was ist die Wagennummer des kaputten Wagens? (z.B.: 50 85 26-94 901-3)",
         type: "regular",
         answers: [
             "Manuell eingeben"
         ]
-       
     },
     {
         id: 3,
-        text: "Wie würdest du den defekt schätzen?",
-        type: "sortable",
-        answers: [
-            "Sehr wichtig - habe einen wichtigen Termin",
-            "Wichtig - aber etwas Verspätung ist okay",
-            "Nicht so wichtig - bin flexibel",
-            "Egal - Kann Warten"
-        ]
-    },
-    {
-        id: 4,
-        text: "Wo hasst du einen ersatzwagen gefunden? (Ex. Basel) ",
+        text: "Wo hast du einen Ersatzwagen gefunden? (z.B.: Basel SBB)",
         type: "regular",
         answers: [
             "Manuell eingeben"
         ]
-       
+    }, 
+    {
+        id: 4,
+        text: "Was ist die Wagennummer vom Ersatzwagen? (z.B.: 50 85 26-94 901-3)",
+        type: "regular",
+        answers: [
+            "Manuell eingeben"
+        ]
     },
 ];
 
@@ -100,6 +95,21 @@ function showQuestion(questionIndex) {
     container.appendChild(questionDiv);
 }
 
+function validateCirculationQuestionInput(input) {
+    const regex = /^\d{3}-[1-4]$/;
+    return regex.test(input);
+}
+
+function validateWagonNumberQuestionInput(input) {
+    const regex = /^\d{2} \d{2} \d{2}-\d{2} \d{3}-\d$/;
+    return regex.test(input);
+}
+
+function validateLocationQuestionInput(input) {
+    const regex = /^[A-Za-z\s]+$/;
+    return regex.test(input) && input.trim() !== "";
+}
+
 function createRegularQuestion(containerDiv, question) {
     const answersDiv = document.createElement('div');
     answersDiv.className = 'answers';
@@ -121,6 +131,19 @@ function createRegularQuestion(containerDiv, question) {
             submitButton.textContent = 'Antwort senden';
             submitButton.onclick = () => {
                 const manualAnswer = document.getElementById('manualAnswer').value;
+                if (question.id === 1 && !validateCirculationQuestionInput(manualAnswer)) {
+                    alert('Bitte geben Sie eine gültige Antwort im Format ...-. ein, wobei ... Zahlen sind und die letzte Ziffer 1, 2, 3 oder 4 ist.');
+                    return;
+                }
+                if ((question.id === 2 || question.id === 4) && !validateWagonNumberQuestionInput(manualAnswer)){
+                    alert("Bitte geben Sie eine gültige Antwort in folgendem Format: .. .. ..-.. ...-. (Beispiel:50 85 26-94 901-3)");
+                    return;
+                }
+                if (question.id === 3 && !validateLocationQuestionInput(manualAnswer)){
+                    alert("Bitte geben Sie eine gültige Antwort ein. Die Antwort besteht nur aus Buchstaben!");
+                    return;
+                }
+                
                 if (manualAnswer) {
                     userAnswers.push(manualAnswer);
                     currentQuestion++;
@@ -128,6 +151,13 @@ function createRegularQuestion(containerDiv, question) {
                 }
             };
             answersDiv.appendChild(submitButton);
+
+            // Add event listener for Enter key
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    submitButton.click();
+                }
+            });
         } else {
             const button = document.createElement('button');
             button.className = 'waves-effect waves-light btn-large';
@@ -140,6 +170,13 @@ function createRegularQuestion(containerDiv, question) {
                 showQuestion(currentQuestion);
             };
             answersDiv.appendChild(button);
+
+            // Add event listener for Enter key
+            button.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    button.click();
+                }
+            });
         }
     });
 
@@ -172,6 +209,13 @@ function createSortableQuestion(containerDiv, question) {
 
     containerDiv.appendChild(list);
     containerDiv.appendChild(submitButton);
+
+    // Add event listener for Enter key
+    submitButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            submitButton.click();
+        }
+    });
 }
 
 function setupDragAndDrop(list) {
@@ -211,9 +255,26 @@ function showResponseForm() {
     document.getElementById('quiz-container').classList.add('hidden');
     document.getElementById('responseForm').classList.remove('hidden');
     
-    // Pre-fill the response with quiz answers
-    document.getElementById('message').value = formatQuizResponses();
-    Materialize.updateTextFields();
+    // Add a "Show Answers" button
+    const showAnswersButton = document.createElement('button');
+    showAnswersButton.className = 'waves-effect waves-light btn';
+    showAnswersButton.textContent = 'Show Answers';
+    showAnswersButton.onclick = () => {
+        const messageElement = document.getElementById('message');
+        messageElement.value = formatQuizResponses();
+        messageElement.setAttribute('readonly', true); // Make the textarea readonly
+        Materialize.updateTextFields();
+    };
+
+    const responseForm = document.getElementById('responseForm');
+    responseForm.appendChild(showAnswersButton);
+
+    // Add event listener for Enter key
+    showAnswersButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            showAnswersButton.click();
+        }
+    });
 }
 
 function formatQuizResponses() {
@@ -275,17 +336,3 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventHandlers();
     showQuestion(currentQuestion);
 });
-
-
-
-
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// console.log(app)
-// const db = getDatabase(app)
-// //var db = app.database();
-// console.log(db)
-
-// const responsesRef = ref(db, 'responses');
-// console.log(responsesRef)
-// //var responsesRef = db.ref("/responses");
