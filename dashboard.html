@@ -26,22 +26,16 @@
     </style>
 </head>
 <body>
-    <script>
-        if (localStorage.getItem('authenticated') !== 'true') {
-            window.location.href = 'login.html';
-        }
-    </script>
-    <!-- Navigation -->
     <nav class="red">
         <div class="nav-wrapper container">
-          <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
-          <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
-            <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
-            <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
-            <li><a href="index.html"><i class="material-icons left">home</i>Zurück zum Quiz</a></li>
-          </ul>
+            <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+                <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
+                <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
+                <li><a href="index.html"><i class="material-icons left">home</i>Zurück zum Quiz</a></li>
+            </ul>
         </div>
     </nav>
 
@@ -76,9 +70,17 @@
     <script type="module" src="dashboard.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize sidenav
             const sidenavElems = document.querySelectorAll('.sidenav');
-            M.Sidenav.init(sidenavElems);
+            const sidenavInstances = M.Sidenav.init(sidenavElems);
+
+            sidenavInstances.forEach(instance => {
+                instance.options.onOpenStart = () => {
+                    document.body.classList.add('nav-opened');
+                };
+                instance.options.onCloseEnd = () => {
+                    document.body.classList.remove('nav-opened');
+                };
+            });
         });
     </script>
 </body>

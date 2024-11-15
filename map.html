@@ -25,7 +25,17 @@
         .info-icon {
             font-size: 1.5em;
             cursor: pointer;
-            vertical-align: middle; /* Align the icon vertically in the middle */
+            vertical-align: middle;
+        }
+        
+        /* Ensure Leaflet controls are behind the navbar */
+        .leaflet-control-container {
+            z-index: 1; /* Lower z-index to push behind other elements */
+        }
+
+        /* Hide zoom controls when nav is open */
+        .nav-opened .leaflet-control-zoom {
+            display: none;
         }
     </style>
 </head>
@@ -135,9 +145,9 @@
             locationsList.innerHTML = '';
 
             Object.values(responses).forEach(response => {
-                if (response.answers && response.answers[2]) { // Index 2 contains the location
+                if (response.answers && response.answers[2]) {
                     const location = response.answers[2];
-                    const wagonNumber = response.answers[3]; // Assuming index 3 contains the wagon number
+                    const wagonNumber = response.answers[3];
                     locationCount[location] = (locationCount[location] || 0) + 1;
                     locationWagons[location] = locationWagons[location] || [];
                     locationWagons[location].push(wagonNumber);
@@ -150,7 +160,6 @@
                 }
             });
 
-            // Update location list
             Object.entries(locationCount)
                 .sort((a, b) => b[1] - a[1])
                 .forEach(([location, count]) => {
@@ -160,7 +169,6 @@
                     locationsList.appendChild(div);
                 });
 
-            // Make locationWagons globally accessible
             window.locationWagons = locationWagons;
         }
 
@@ -185,14 +193,22 @@
             }
         });
 
-        // Initialize Materialize modal
+        // Initialize Materialize modal and sidenav
         document.addEventListener('DOMContentLoaded', function() {
             const elems = document.querySelectorAll('.modal');
             M.Modal.init(elems);
 
-            // Initialize sidenav
             const sidenavElems = document.querySelectorAll('.sidenav');
-            M.Sidenav.init(sidenavElems);
+            const sidenavInstances = M.Sidenav.init(sidenavElems);
+
+            sidenavInstances.forEach(instance => {
+                instance.options.onOpenStart = () => {
+                    document.body.classList.add('nav-opened');
+                };
+                instance.options.onCloseEnd = () => {
+                    document.body.classList.remove('nav-opened');
+                };
+            });
         });
     </script>
 </body>
