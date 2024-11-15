@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBB Zug König - Statistiken</title>
+    
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .chart-container {
+            position: relative;
+            margin: 20px 0;
+            height: 400px;
+        }
+        .stat-card {
+            padding: 20px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="red">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
+            <ul id="nav-mobile" class="right">
+                <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+                <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
+                <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
+                <li><a href="index.html"><i class="material-icons left">home</i>Zurück zum Quiz</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h4>Statistiken</h4>
+        
+        <!-- Summary Cards -->
+        <div class="row">
+            <div class="col s12 m4">
+                <div class="card-panel red white-text stat-card">
+                    <h5>Gesamtzahl Meldungen</h5>
+                    <h3 id="totalReports">-</h3>
+                </div>
+            </div>
+            <div class="col s12 m4">
+                <div class="card-panel red white-text stat-card">
+                    <h5>Häufigster Standort</h5>
+                    <h3 id="mostCommonLocation">-</h3>
+                </div>
+            </div>
+            <div class="col s12 m4">
+                <div class="card-panel red white-text stat-card">
+                    <h5>Aktive Umläufe</h5>
+                    <h3 id="activeCirculations">-</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row">
+            <!-- Location Chart -->
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Ersatzwagen nach Standort</span>
+                        <div class="chart-container">
+                            <canvas id="locationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Circulation Chart -->
+            <div class="col s12 m6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Meldungen pro Umlauf</span>
+                        <div class="chart-container">
+                            <canvas id="circulationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Series Chart -->
+        <div class="row">
+            <div class="col s12">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Meldungen über Zeit</span>
+                        <div class="chart-container">
+                            <canvas id="timeSeriesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoyq5kK7mNpXFgBgR9QTz-4rLzXJvdAcc",
+            authDomain: "sbb-zug-koenig.firebaseapp.com",
+            projectId: "sbb-zug-koenig",
+            databaseURL: "https://sbb-zug-koenig-default-rtdb.europe-west1.firebasedatabase.app",
+            storageBucket: "sbb-zug-koenig.appspot.com",
+            messagingSenderId: "1072715642091",
+            appId: "1:1072715642091:web:a15dd2b681e3577026baae",
+            measurementId: "G-PQY92PKZG6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let locationChart, circulationChart, timeSeriesChart;
+
+        function initializeCharts() {
+            // Location Chart
+            const locationCtx = document.getElementById('locationChart').getContext('2d');
+            locationChart = new Chart(locationCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Anzahl Ersatzwagen',
+                        data: [],
+                        backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                        borderColor: 'rgba(255, 0, 0, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Circulation Chart
+            const circulationCtx = document.getElementById('circulationChart').getContext('2d');
+            circulationChart = new Chart(circulationCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Anzahl Meldungen',
+                        data: [],
+                        backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                        borderColor: 'rgba(255, 0, 0, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Time Series Chart
+            const timeSeriesCtx = document.getElementById('timeSeriesChart').getContext('2d');
+            timeSeriesChart = new Chart(timeSeriesCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Meldungen pro Tag',
+                        data: [],
+                        borderColor: 'rgba(255, 0, 0, 1)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(responses) {
+            const locationData = {};
+            const circulationData = {};
+            const timeSeriesData = {};
+            
+            Object.values(responses).forEach(response => {
+                if (response.answers) {
+                    // Location data (answer index 2)
+                    const location = response.answers[2];
+                    locationData[location] = (locationData[location] || 0) + 1;
+
+                    // Circulation data (answer index 0)
+                    const circulation = response.answers[0];
+                    circulationData[circulation] = (circulationData[circulation] || 0) + 1;
+
+                    // Time series data
+                    if (response.createdAt) {
+                        const date = new Date(response.createdAt).toLocaleDateString();
+                        timeSeriesData[date] = (timeSeriesData[date] || 0) + 1;
+                    }
+                }
+            });
+
+            // Update summary cards
+            document.getElementById('totalReports').textContent = Object.values(responses).length;
+            document.getElementById('mostCommonLocation').textContent = Object.entries(locationData)
+                .sort((a, b) => b[1] - a[1])[0][0];
+            document.getElementById('activeCirculations').textContent = Object.keys(circulationData).length;
+
+            // Update location chart
+            locationChart.data.labels = Object.keys(locationData);
+            locationChart.data.datasets[0].data = Object.values(locationData);
+            locationChart.update();
+
+            // Update circulation chart
+            circulationChart.data.labels = Object.keys(circulationData);
+            circulationChart.data.datasets[0].data = Object.values(circulationData);
+            circulationChart.update();
+
+            // Update time series chart
+            const sortedDates = Object.keys(timeSeriesData).sort((a, b) => new Date(a) - new Date(b));
+            timeSeriesChart.data.labels = sortedDates;
+            timeSeriesChart.data.datasets[0].data = sortedDates.map(date => timeSeriesData[date]);
+            timeSeriesChart.update();
+        }
+
+        // Initialize charts and listen for data changes
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCharts();
+            const responsesRef = ref(db, 'responses');
+            onValue(responsesRef, (snapshot) => {
+                const responses = snapshot.val();
+                if (responses) {
+                    updateCharts(responses);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -59,7 +59,7 @@ function updateStats() {
         <div class="col s12 m3">
             <div class="card-panel stat-card">
                 <div class="stat-number">${stats.averageResponseTime}</div>
-                <div class="stat-label">ø Antworzeit in min</div>
+                <div class="stat-label">ø Antworzeit in m</div>
             </div>
         </div>
         <div class="col s12 m3">
