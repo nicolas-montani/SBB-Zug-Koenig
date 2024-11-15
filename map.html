@@ -22,21 +22,40 @@
             margin-top: 20px;
             padding: 20px;
         }
+        .info-icon {
+            font-size: 1.5em;
+            cursor: pointer;
+            vertical-align: middle; /* Align the icon vertically in the middle */
+        }
     </style>
 </head>
 <body>
+    <script>
+        if (localStorage.getItem('authenticated') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <!-- Navigation -->
     <nav class="red">
         <div class="nav-wrapper container">
           <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
-          <ul id="nav-mobile" class="right">
+          <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
             <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
             <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
             <li><a href="index.html"><i class="material-icons left">home</i>Zurück zum Quiz</a></li>
           </ul>
         </div>
-      </nav>
+    </nav>
+
+    <!-- Side Navigation for Mobile -->
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+        <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
+        <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
+        <li><a href="index.html"><i class="material-icons left">home</i>Zurück zum Quiz</a></li>
+    </ul>
 
     <div class="container">
         <h4>Ersatzwagen Standorte</h4>
@@ -44,6 +63,17 @@
         <div class="location-list">
             <h5>Aktuelle Standorte</h5>
             <div id="locationsList"></div>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="wagonModal" class="modal">
+        <div class="modal-content">
+            <h4 id="modalTitle">Wagen Nummern</h4>
+            <p id="wagonNumbers"></p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Schließen</a>
         </div>
     </div>
 
@@ -100,17 +130,21 @@
         function updateMap(responses) {
             markersLayer.clearLayers();
             const locationCount = {};
+            const locationWagons = {};
             const locationsList = document.getElementById('locationsList');
             locationsList.innerHTML = '';
 
             Object.values(responses).forEach(response => {
                 if (response.answers && response.answers[2]) { // Index 2 contains the location
                     const location = response.answers[2];
+                    const wagonNumber = response.answers[3]; // Assuming index 3 contains the wagon number
                     locationCount[location] = (locationCount[location] || 0) + 1;
+                    locationWagons[location] = locationWagons[location] || [];
+                    locationWagons[location].push(wagonNumber);
 
                     if (cityCoordinates[location]) {
                         const marker = L.marker(cityCoordinates[location])
-                            .bindPopup(`${location}<br>Anzahl Ersatzwagen: ${locationCount[location]}`);
+                            .bindPopup(`<b>${location}</b><br>Anzahl Ersatzwagen: ${locationCount[location]} <i class="material-icons info-icon" onclick="showWagonNumbers('${location}')">info</i>`);
                         markersLayer.addLayer(marker);
                     }
                 }
@@ -125,7 +159,22 @@
                     div.innerHTML = `<b>${location}</b>: ${count} Ersatzwagen`;
                     locationsList.appendChild(div);
                 });
+
+            // Make locationWagons globally accessible
+            window.locationWagons = locationWagons;
         }
+
+        // Function to show wagon numbers
+        window.showWagonNumbers = function(location) {
+            const wagons = window.locationWagons[location] || [];
+            const wagonNumbers = document.getElementById('wagonNumbers');
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.innerHTML = `Wagen Nummern in ${location}`;
+            wagonNumbers.innerHTML = wagons.map(wagon => `<div>${wagon}</div>`).join('');
+            const modal = document.getElementById('wagonModal');
+            const instance = M.Modal.getInstance(modal);
+            instance.open();
+        };
 
         // Listen for changes in the database
         const responsesRef = ref(db, 'responses');
@@ -134,6 +183,16 @@
             if (responses) {
                 updateMap(responses);
             }
+        });
+
+        // Initialize Materialize modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const elems = document.querySelectorAll('.modal');
+            M.Modal.init(elems);
+
+            // Initialize sidenav
+            const sidenavElems = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(sidenavElems);
         });
     </script>
 </body>
