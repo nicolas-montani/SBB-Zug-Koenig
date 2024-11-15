@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="red">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h3>Login</h3>
+        <form id="loginForm">
+            <div class="input-field">
+                <input type="text" id="username" required>
+                <label for="username">Username</label>
+            </div>
+            <div class="input-field">
+                <input type="password" id="password" required>
+                <label for="password">Password</label>
+            </div>
+            <button class="btn red" type="submit">Login</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.updateTextFields();
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Simple authentication logic (replace with real authentication)
+            if (username === 'admin' && password === 'milnico') {
+                localStorage.setItem('authenticated', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                alert('Invalid credentials');
+            }
+        });
+    </script>
+</body>
+</html>
