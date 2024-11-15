@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBB Zug König - Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            margin: 1rem 0;
+            padding: 1rem;
+        }
+        .response-details {
+            margin-top: 1rem;
+        }
+        .stat-card {
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ec0000;
+        }
+    </style>
+</head>
+<body>
+    <nav class="red">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row" id="statsRow">
+            <!-- Stats cards will be inserted here -->
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <div class="input-field">
+                    <input type="text" id="searchInput" onkeyup="filterResponses()">
+                    <label for="searchInput">Nach Name oder Antwort suchen</label>
+                </div>
+            </div>
+        </div>
+
+        <div id="responsesContainer">
+            <!-- Responses will be inserted here -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="module" src="dashboard.js"></script>
+</body>
+</html>
