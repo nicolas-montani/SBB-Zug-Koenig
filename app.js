@@ -61,7 +61,6 @@ let userAnswers = [];
 // Event Handlers Setup
 function setupEventHandlers() {
     const responseForm = document.getElementById('responseForm');
-
     responseForm.addEventListener("submit", handleSubmit);
 }
 
@@ -69,9 +68,17 @@ function setupEventHandlers() {
 function showQuestion(questionIndex) {
     const container = document.getElementById('question-container');
     const progressDiv = document.getElementById('progress');
+    let progressBar = document.querySelector('.progress-bar');
+
+    if (!progressBar) {
+        progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressDiv.appendChild(progressBar);
+    }
+
+    progressBar.style.width = `${(questionIndex / questions.length) * 100}%`;
 
     container.innerHTML = '';
-    progressDiv.textContent = `Frage ${questionIndex + 1} von ${questions.length}`;
 
     if (questionIndex >= questions.length) {
         showResponseForm();
@@ -119,8 +126,14 @@ function createRegularQuestion(containerDiv, question) {
             const input = document.createElement('input');
             input.type = 'text';
             input.placeholder = 'Antwort hier';
-            input.id = 'manualAnswer';
+            input.id = `manualAnswer-${question.id}`;
             answersDiv.appendChild(input);
+
+            // Create error message container
+            const errorMessageDiv = document.createElement('div');
+            errorMessageDiv.id = `error-message-${question.id}`;
+            errorMessageDiv.className = 'hidden';
+            answersDiv.appendChild(errorMessageDiv);
 
             const submitButton = document.createElement('button');
             submitButton.className = 'waves-effect waves-light btn-large';
@@ -130,22 +143,24 @@ function createRegularQuestion(containerDiv, question) {
             submitButton.style.backgroundColor = "red";
             submitButton.textContent = 'Antwort senden';
             submitButton.onclick = () => {
-                const manualAnswer = document.getElementById('manualAnswer').value;
+                const manualAnswer = document.getElementById(`manualAnswer-${question.id}`).value;
+                hideError(question.id); // Hide any previous error message
+
                 if (question.id === 1 && !validateCirculationQuestionInput(manualAnswer)) {
-                    alert('Bitte geben Sie eine gültige Antwort im Format ...-. ein, wobei ... Zahlen sind und die letzte Ziffer 1, 2, 3 oder 4 ist.');
+                    showError('Bitte geben Sie eine gültige Antwort im Format ...-. ein, wobei die letzte Ziffer eine Zahl von 1-4 ist.', question.id);
                     return;
                 }
-                if ((question.id === 2 || question.id === 4) && !validateWagonNumberQuestionInput(manualAnswer)){
-                    alert("Bitte geben Sie eine gültige Antwort in folgendem Format: .. .. ..-.. ...-. (Beispiel:50 85 26-94 901-3)");
+                if ((question.id === 2 || question.id === 4) && !validateWagonNumberQuestionInput(manualAnswer)) {
+                    showError("Bitte geben Sie eine gültige Antwort in folgendem Format: .. .. ..-.. ...-. (Beispiel:50 85 26-94 901-3)", question.id);
                     return;
                 }
-                if (question.id === 3 && !validateLocationQuestionInput(manualAnswer)){
-                    alert("Bitte geben Sie eine gültige Antwort ein. Die Antwort besteht nur aus Buchstaben!");
+                if (question.id === 3 && !validateLocationQuestionInput(manualAnswer)) {
+                    showError("Bitte geben Sie eine gültige Antwort ein. Die Antwort besteht nur aus Buchstaben!", question.id);
                     return;
                 }
-                
+
                 if (manualAnswer) {
-                    userAnswers.push(manualAnswer);
+                    userAnswers[question.id - 1] = manualAnswer;
                     currentQuestion++;
                     showQuestion(currentQuestion);
                 }
@@ -165,7 +180,7 @@ function createRegularQuestion(containerDiv, question) {
             button.style.marginBottom = '10px';
             button.textContent = answer;
             button.onclick = () => {
-                userAnswers.push(answer);
+                userAnswers[question.id - 1] = answer;
                 currentQuestion++;
                 showQuestion(currentQuestion);
             };
@@ -263,10 +278,13 @@ function showResponseForm() {
 }
 
 function formatQuizResponses() {
-    let response = "Quiz Answers:\n\n";
+    let response = "";
     questions.forEach((question, index) => {
         response += `${question.text}\n`;
-        response += `Answer: ${Array.isArray(userAnswers[index]) ? userAnswers[index].join(' > ') : userAnswers[index]}\n\n`;
+        response += `Antwort: ${Array.isArray(userAnswers[index]) ? userAnswers[index].join(' > ') : userAnswers[index]}`;
+        if (index < questions.length - 1) {
+            response += "\n\n";
+        }
     });
     return response;
 }
@@ -314,6 +332,18 @@ function showThankYouMessage() {
             <button class="waves-effect waves-light btn red" onclick="location.reload()">Neu starten</button>
         </div>
     `;
+}
+
+function showError(message, questionId) {
+    const errorMessageDiv = document.getElementById(`error-message-${questionId}`);
+    errorMessageDiv.innerHTML = `<b>${message}</b>`;
+    errorMessageDiv.classList.remove('hidden');
+    errorMessageDiv.style.color = 'red'; // Ensure the color is set to red
+}
+
+function hideError(questionId) {
+    const errorMessageDiv = document.getElementById(`error-message-${questionId}`);
+    errorMessageDiv.classList.add('hidden');
 }
 
 // Initialize
