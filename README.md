@@ -19,10 +19,6 @@ Um die App zu nutzen, einfach dem folgenden Link folgen und das Spiel direkt im 
 
 [https://sbb-zug-koenig.vercel.app/](https://sbb-zug-koenig.vercel.app/)
 
-## Beitrag
-
-Wir freuen uns über Beiträge und Ideen! Wenn du Vorschläge für neue Funktionen oder Fehlerkorrekturen hast, eröffne gerne ein Issue oder einen Pull-Request.
-
 ## Autoren und Kontakt
 
 - **Milan Milenkovic**  
