@@ -336,9 +336,10 @@ function showThankYouMessage() {
 
 function showError(message, questionId) {
     const errorMessageDiv = document.getElementById(`error-message-${questionId}`);
-    errorMessageDiv.innerHTML = `<b>${message}</b>`;
+    errorMessageDiv.innerHTML = `<b>${message}</b><br>`;
     errorMessageDiv.classList.remove('hidden');
     errorMessageDiv.style.color = 'red'; // Ensure the color is set to red
+    errorMessageDiv.classList.add('error-message'); // Add class for consistent styling
 }
 
 function hideError(questionId) {
