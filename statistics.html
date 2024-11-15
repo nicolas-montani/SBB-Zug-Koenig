@@ -19,17 +19,55 @@
             height: 400px;
         }
         .stat-card {
-            padding: 20px;
+            padding: 1rem;
             margin: 10px 0;
+            height: 200px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .settings-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #f44336;
+            color: white;
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+        }
+        .brand-logo {
+            font-size: 1.5rem;
+        }
+        @media (max-width: 992px) {
+            .brand-logo {
+                font-size: 1.2rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .brand-logo {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
+    <script>
+        if (localStorage.getItem('authenticated') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <!-- Navigation -->
     <nav class="red">
         <div class="nav-wrapper container">
             <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
-            <ul id="nav-mobile" class="right">
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
                 <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
                 <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
@@ -38,27 +76,42 @@
         </div>
     </nav>
 
+    <!-- Side Navigation for Mobile -->
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="dashboard.html"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+        <li><a href="map.html"><i class="material-icons left">map</i>Karte</a></li>
+        <li><a href="statistics.html"><i class="material-icons left">bar_chart</i>Statistiken</a></li>
+        <li><a href="index.html"><i class="material-icons left">home</i>Zurück zum Quiz</a></li>
+    </ul>
+
     <div class="container">
         <h4>Statistiken</h4>
         
         <!-- Summary Cards -->
         <div class="row">
-            <div class="col s12 m4">
+            <div class="col s12 m3">
                 <div class="card-panel red white-text stat-card">
                     <h5>Gesamtzahl Meldungen</h5>
                     <h3 id="totalReports">-</h3>
                 </div>
             </div>
-            <div class="col s12 m4">
+            <div class="col s12 m3">
                 <div class="card-panel red white-text stat-card">
                     <h5>Häufigster Standort</h5>
                     <h3 id="mostCommonLocation">-</h3>
                 </div>
             </div>
-            <div class="col s12 m4">
+            <div class="col s12 m3">
                 <div class="card-panel red white-text stat-card">
                     <h5>Aktive Umläufe</h5>
                     <h3 id="activeCirculations">-</h3>
+                </div>
+            </div>
+            <div class="col s12 m3">
+                <div class="card-panel red white-text stat-card">
+                    <h5>Meiste Meldungen von</h5>
+                    <h3 id="mostActiveUser">-</h3>
+                    <h6 id="mostActiveUserCount">-</h6>
                 </div>
             </div>
         </div>
@@ -66,10 +119,9 @@
         <!-- Charts -->
         <div class="row">
             <!-- Location Chart -->
-            <div class="col s12 m6">
+            <div class="col s12 m6" id="locationChartContainer">
                 <div class="card">
                     <div class="card-content">
-                        <span class="card-title">Ersatzwagen nach Standort</span>
                         <div class="chart-container">
                             <canvas id="locationChart"></canvas>
                         </div>
@@ -78,10 +130,9 @@
             </div>
 
             <!-- Circulation Chart -->
-            <div class="col s12 m6">
+            <div class="col s12 m6" id="circulationChartContainer">
                 <div class="card">
                     <div class="card-content">
-                        <span class="card-title">Meldungen pro Umlauf</span>
                         <div class="chart-container">
                             <canvas id="circulationChart"></canvas>
                         </div>
@@ -92,16 +143,46 @@
 
         <!-- Time Series Chart -->
         <div class="row">
-            <div class="col s12">
+            <div class="col s12" id="timeSeriesChartContainer">
                 <div class="card">
                     <div class="card-content">
-                        <span class="card-title">Meldungen über Zeit</span>
                         <div class="chart-container">
                             <canvas id="timeSeriesChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Settings Icon -->
+    <div class="settings-icon modal-trigger" href="#settingsModal">
+        <i class="material-icons">settings</i>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h4>Einstellungen</h4>
+            <div class="row">
+                <div class="col s12">
+                    <label>
+                        <input type="checkbox" id="showLocationChart" />
+                        <span>Ersatzwagen nach Standort</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="showCirculationChart" />
+                        <span>Meldungen pro Umlauf</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="showTimeSeriesChart" />
+                        <span>Meldungen über Zeit</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Schließen</a>
         </div>
     </div>
 
@@ -219,6 +300,7 @@
             const locationData = {};
             const circulationData = {};
             const timeSeriesData = {};
+            const userData = {};
             
             Object.values(responses).forEach(response => {
                 if (response.answers) {
@@ -235,6 +317,10 @@
                         const date = new Date(response.createdAt).toLocaleDateString();
                         timeSeriesData[date] = (timeSeriesData[date] || 0) + 1;
                     }
+
+                    // User data (fullName field)
+                    const user = response.fullName;
+                    userData[user] = (userData[user] || 0) + 1;
                 }
             });
 
@@ -243,6 +329,9 @@
             document.getElementById('mostCommonLocation').textContent = Object.entries(locationData)
                 .sort((a, b) => b[1] - a[1])[0][0];
             document.getElementById('activeCirculations').textContent = Object.keys(circulationData).length;
+            const mostActiveUser = Object.entries(userData).sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('mostActiveUser').textContent = mostActiveUser[0];
+            document.getElementById('mostActiveUserCount').textContent = `(${mostActiveUser[1]} ${mostActiveUser[1] === 1 ? 'Meldung' : 'Meldungen'})`;
 
             // Update location chart
             locationChart.data.labels = Object.keys(locationData);
@@ -261,6 +350,30 @@
             timeSeriesChart.update();
         }
 
+        function toggleChartVisibility() {
+            document.getElementById('locationChartContainer').style.display = document.getElementById('showLocationChart').checked ? 'block' : 'none';
+            document.getElementById('circulationChartContainer').style.display = document.getElementById('showCirculationChart').checked ? 'block' : 'none';
+            document.getElementById('timeSeriesChartContainer').style.display = document.getElementById('showTimeSeriesChart').checked ? 'block' : 'none';
+        }
+
+        function saveSettings() {
+            localStorage.setItem('showLocationChart', document.getElementById('showLocationChart').checked);
+            localStorage.setItem('showCirculationChart', document.getElementById('showCirculationChart').checked);
+            localStorage.setItem('showTimeSeriesChart', document.getElementById('showTimeSeriesChart').checked);
+        }
+
+        function loadSettings() {
+            const showLocationChart = localStorage.getItem('showLocationChart') === 'true';
+            const showCirculationChart = localStorage.getItem('showCirculationChart') === 'true';
+            const showTimeSeriesChart = localStorage.getItem('showTimeSeriesChart') === 'true';
+
+            document.getElementById('showLocationChart').checked = showLocationChart;
+            document.getElementById('showCirculationChart').checked = showCirculationChart;
+            document.getElementById('showTimeSeriesChart').checked = showTimeSeriesChart;
+
+            toggleChartVisibility();
+        }
+
         // Initialize charts and listen for data changes
         document.addEventListener('DOMContentLoaded', () => {
             initializeCharts();
@@ -270,6 +383,31 @@
                 if (responses) {
                     updateCharts(responses);
                 }
+            });
+
+            // Initialize modal
+            const elems = document.querySelectorAll('.modal');
+            M.Modal.init(elems);
+
+            // Initialize sidenav
+            const sidenavElems = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(sidenavElems);
+
+            // Load settings from localStorage
+            loadSettings();
+
+            // Add event listeners to checkboxes
+            document.getElementById('showLocationChart').addEventListener('change', () => {
+                toggleChartVisibility();
+                saveSettings();
+            });
+            document.getElementById('showCirculationChart').addEventListener('change', () => {
+                toggleChartVisibility();
+                saveSettings();
+            });
+            document.getElementById('showTimeSeriesChart').addEventListener('change', () => {
+                toggleChartVisibility();
+                saveSettings();
             });
         });
     </script>
