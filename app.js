@@ -44,7 +44,7 @@ const questions = [
         answers: [
             "Manuell eingeben"
         ]
-    }, 
+    },
     {
         id: 4,
         text: "Was ist die Wagennummer vom Ersatzwagen? (z.B.: 50 85 26-94 901-3)",
@@ -88,7 +88,7 @@ function showQuestion(questionIndex) {
     const question = questions[questionIndex];
     const questionDiv = document.createElement('div');
     questionDiv.className = 'question';
-    
+
     const questionTitle = document.createElement('h5');
     questionTitle.textContent = question.text;
     questionDiv.appendChild(questionTitle);
@@ -123,157 +123,427 @@ function createRegularQuestion(containerDiv, question) {
 
     question.answers.forEach(answer => {
         if (answer === "Manuell eingeben") {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Antwort hier';
-            input.id = `manualAnswer-${question.id}`;
-            answersDiv.appendChild(input);
+            if (question.id === 1) {
+                // Create special input for circulation number
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+                inputGroup.style.display = 'flex';
+                inputGroup.style.alignItems = 'center';
+                inputGroup.style.gap = '8px';
+                inputGroup.style.marginBottom = '20px';
 
-            // Create error message container
-            const errorMessageDiv = document.createElement('div');
-            errorMessageDiv.id = `error-message-${question.id}`;
-            errorMessageDiv.className = 'hidden';
-            answersDiv.appendChild(errorMessageDiv);
+                // Create three boxes for first three digits
+                const firstThreeDigits = document.createElement('div');
+                firstThreeDigits.style.display = 'flex';
+                firstThreeDigits.style.gap = '8px';
 
-            const submitButton = document.createElement('button');
-            submitButton.className = 'waves-effect waves-light btn-large';
-            submitButton.style.display = 'block';
-            submitButton.style.marginBottom = '10px';
-            submitButton.style.color = "white";
-            submitButton.style.backgroundColor = "red";
-            submitButton.textContent = 'Antwort senden';
-            submitButton.onclick = () => {
-                const manualAnswer = document.getElementById(`manualAnswer-${question.id}`).value;
-                hideError(question.id); // Hide any previous error message
+                // Common input styles
+                const inputStyle = {
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    fontSize: '16px',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '8px',
+                    backgroundColor: '#fff',
+                    padding: '0',
+                    margin: '0',
+                    boxShadow: 'none',
+                    outline: 'none'
+                };
 
-                if (question.id === 1 && !validateCirculationQuestionInput(manualAnswer)) {
-                    showError('Bitte geben Sie eine gültige Antwort im Format ...-. ein, wobei die letzte Ziffer eine Zahl von 1-4 ist.', question.id);
-                    return;
+                // Function to get next input element
+                const getNextInput = (currentInput) => {
+                    const allInputs = [...firstThreeDigits.querySelectorAll('input'), lastDigit];
+                    const currentIndex = allInputs.indexOf(currentInput);
+                    return allInputs[currentIndex + 1];
+                };
+
+                // Function to get previous input element
+                const getPrevInput = (currentInput) => {
+                    const allInputs = [...firstThreeDigits.querySelectorAll('input'), lastDigit];
+                    const currentIndex = allInputs.indexOf(currentInput);
+                    return allInputs[currentIndex - 1];
+                };
+
+                // Create first three inputs
+                for (let i = 0; i < 3; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    input.className = 'digit-input';
+                    input.inputMode = 'numeric';
+
+                    Object.assign(input.style, inputStyle);
+
+                    input.addEventListener('focus', () => {
+                        input.style.borderColor = '#007bff';
+                        input.select();
+                    });
+
+                    input.addEventListener('blur', () => {
+                        input.style.borderColor = '#dee2e6';
+                    });
+
+                    input.addEventListener('input', (e) => {
+                        let value = e.target.value.replace(/[^0-9]/g, '');
+                        e.target.value = value;
+
+                        if (value.length === 1) {
+                            const nextInput = getNextInput(e.target);
+                            if (nextInput) {
+                                nextInput.focus();
+                            }
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace') {
+                            if (e.target.value === '') {
+                                const prevInput = getPrevInput(e.target);
+                                if (prevInput) {
+                                    prevInput.focus();
+                                    prevInput.value = '';
+                                    e.preventDefault();
+                                }
+                            }
+                        } else if (e.key === 'ArrowLeft') {
+                            const prevInput = getPrevInput(e.target);
+                            if (prevInput) {
+                                prevInput.focus();
+                                e.preventDefault();
+                            }
+                        } else if (e.key === 'ArrowRight') {
+                            const nextInput = getNextInput(e.target);
+                            if (nextInput) {
+                                nextInput.focus();
+                                e.preventDefault();
+                            }
+                        }
+                    });
+
+                    input.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                        const numericValue = pastedText.replace(/[^0-9]/g, '');
+                        if (numericValue.length > 0) {
+                            input.value = numericValue[0];
+                            const nextInput = getNextInput(input);
+                            if (nextInput) nextInput.focus();
+                        }
+                    });
+
+                    firstThreeDigits.appendChild(input);
                 }
-                if ((question.id === 2 || question.id === 4) && !validateWagonNumberQuestionInput(manualAnswer)) {
-                    showError("Bitte geben Sie eine gültige Antwort in folgendem Format: .. .. ..-.. ...-. (Beispiel:50 85 26-94 901-3)", question.id);
-                    return;
-                }
-                if (question.id === 3 && !validateLocationQuestionInput(manualAnswer)) {
-                    showError("Bitte geben Sie eine gültige Antwort ein. Die Antwort besteht nur aus Buchstaben!", question.id);
-                    return;
-                }
 
-                if (manualAnswer) {
-                    userAnswers[question.id - 1] = manualAnswer;
+                const dash = document.createElement('span');
+                dash.textContent = '-';
+                dash.style.fontSize = '20px';
+                dash.style.color = '#495057';
+                dash.style.margin = '0 4px';
+
+                const lastDigit = document.createElement('input');
+                lastDigit.type = 'text';
+                lastDigit.maxLength = 1;
+                lastDigit.className = 'digit-input';
+                lastDigit.inputMode = 'numeric';
+                Object.assign(lastDigit.style, inputStyle);
+
+                lastDigit.addEventListener('focus', () => {
+                    lastDigit.style.borderColor = '#007bff';
+                    lastDigit.select();
+                });
+
+                lastDigit.addEventListener('blur', () => {
+                    lastDigit.style.borderColor = '#dee2e6';
+                });
+
+                lastDigit.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/[^1-4]/g, '');
+                    e.target.value = value;
+                });
+
+                lastDigit.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace') {
+                        if (e.target.value === '') {
+                            const prevInput = getPrevInput(e.target);
+                            if (prevInput) {
+                                prevInput.focus();
+                                prevInput.value = '';
+                                e.preventDefault();
+                            }
+                        }
+                    } else if (e.key === 'ArrowLeft') {
+                        const prevInput = getPrevInput(e.target);
+                        if (prevInput) {
+                            prevInput.focus();
+                            e.preventDefault();
+                        }
+                    }
+                });
+
+                lastDigit.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    const numericValue = pastedText.replace(/[^1-4]/g, '');
+                    if (numericValue.length > 0) {
+                        lastDigit.value = numericValue[0];
+                    }
+                });
+
+                inputGroup.appendChild(firstThreeDigits);
+                inputGroup.appendChild(dash);
+                inputGroup.appendChild(lastDigit);
+                answersDiv.appendChild(inputGroup);
+
+                const submitButton = createSubmitButton();
+                submitButton.onclick = () => {
+                    const digits = Array.from(firstThreeDigits.querySelectorAll('input')).map(input => input.value);
+                    const lastValue = lastDigit.value;
+                    const fullValue = `${digits.join('')}-${lastValue}`;
+
+                    if (!validateCirculationQuestionInput(fullValue)) {
+                        alert('Bitte geben Sie eine gültige Antwort ein. Die ersten drei Felder müssen Zahlen sein, und das letzte Feld muss 1, 2, 3 oder 4 sein.');
+                        return;
+                    }
+
+                    userAnswers.push(fullValue);
                     currentQuestion++;
                     showQuestion(currentQuestion);
-                }
-            };
-            answersDiv.appendChild(submitButton);
+                };
 
-            // Add event listener for Enter key
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    submitButton.click();
-                }
-            });
-        } else {
-            const button = document.createElement('button');
-            button.className = 'waves-effect waves-light btn-large';
-            button.style.display = 'block';
-            button.style.marginBottom = '10px';
-            button.textContent = answer;
-            button.onclick = () => {
-                userAnswers[question.id - 1] = answer;
-                currentQuestion++;
-                showQuestion(currentQuestion);
-            };
-            answersDiv.appendChild(button);
+                const allInputs = [...firstThreeDigits.querySelectorAll('input'), lastDigit];
+                allInputs.forEach(input => {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            submitButton.click();
+                        }
+                    });
+                });
 
-            // Add event listener for Enter key
-            button.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    button.click();
-                }
-            });
+                answersDiv.appendChild(submitButton);
+            } else if (question.id === 2 || question.id === 4) {
+                // Create special input for wagon number
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+                inputGroup.style.display = 'flex';
+                inputGroup.style.alignItems = 'center';
+                inputGroup.style.gap = '8px';
+                inputGroup.style.marginBottom = '20px';
+
+                // Common input styles
+                const inputStyle = {
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    fontSize: '16px',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '8px',
+                    backgroundColor: '#fff',
+                    padding: '0',
+                    margin: '0',
+                    boxShadow: 'none',
+                    outline: 'none'
+                };
+
+                // Create input sections with their respective groups and separators
+                const inputSections = [
+                    { group: 2, separator: ' ' },   // 50
+                    { group: 2, separator: ' ' },   // 85
+                    { group: 2, separator: '-' },   // 26
+                    { group: 2, separator: ' ' },   // 94
+                    { group: 3, separator: '-' },   // 901
+                    { group: 1, separator: '' }     // 3
+                ];
+
+                let allInputs = [];
+
+                inputSections.forEach((section, sectionIndex) => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.style.display = 'flex';
+                    sectionDiv.style.gap = '4px';
+
+                    // Create inputs for this section
+                    for (let i = 0; i < section.group; i++) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.className = 'digit-input';
+                        input.inputMode = 'numeric';
+
+                        Object.assign(input.style, inputStyle);
+
+                        input.addEventListener('focus', () => {
+                            input.style.borderColor = '#007bff';
+                            input.select();
+                        });
+
+                        input.addEventListener('blur', () => {
+                            input.style.borderColor = '#dee2e6';
+                        });
+
+                        input.addEventListener('input', (e) => {
+                            let value = e.target.value.replace(/[^0-9]/g, '');
+                            e.target.value = value;
+
+                            if (value.length === 1) {
+                                const nextInput = allInputs[allInputs.indexOf(e.target) + 1];
+                                if (nextInput) {
+                                    nextInput.focus();
+                                }
+                            }
+                        });
+
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Backspace') {
+                                if (e.target.value === '') {
+                                    const prevInput = allInputs[allInputs.indexOf(e.target) - 1];
+                                    if (prevInput) {
+                                        prevInput.focus();
+                                        prevInput.value = '';
+                                        e.preventDefault();
+                                    }
+                                }
+                            } else if (e.key === 'ArrowLeft') {
+                                const prevInput = allInputs[allInputs.indexOf(e.target) - 1];
+                                if (prevInput) {
+                                    prevInput.focus();
+                                    e.preventDefault();
+                                }
+                            } else if (e.key === 'ArrowRight') {
+                                const nextInput = allInputs[allInputs.indexOf(e.target) + 1];
+                                if (nextInput) {
+                                    nextInput.focus();
+                                    e.preventDefault();
+                                }
+                            }
+                        });
+
+                        input.addEventListener('paste', (e) => {
+                            e.preventDefault();
+                            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                            const numericValue = pastedText.replace(/[^0-9]/g, '');
+                            if (numericValue.length > 0) {
+                                input.value = numericValue[0];
+                                const nextInput = allInputs[allInputs.indexOf(input) + 1];
+                                if (nextInput) nextInput.focus();
+                            }
+                        });
+
+                        allInputs.push(input);
+                        sectionDiv.appendChild(input);
+                    }
+
+                    inputGroup.appendChild(sectionDiv);
+
+                    // Add separator if specified
+                    if (section.separator) {
+                        const separator = document.createElement('span');
+                        separator.textContent = section.separator;
+                        separator.style.fontSize = '20px';
+                        separator.style.color = '#495057';
+                        separator.style.margin = '0 4px';
+                        inputGroup.appendChild(separator);
+                    }
+                });
+
+                answersDiv.appendChild(inputGroup);
+
+                const submitButton = createSubmitButton();
+                submitButton.onclick = () => {
+                    const values = allInputs.map(input => input.value);
+                    const formattedValue =
+                        `${values.slice(0, 2).join('')} ` +
+                        `${values.slice(2, 4).join('')} ` +
+                        `${values.slice(4, 6).join('')}-` +
+                        `${values.slice(6, 8).join('')} ` +
+                        `${values.slice(8, 11).join('')}-` +
+                        `${values.slice(11).join('')}`;
+
+                    if (!validateWagonNumberQuestionInput(formattedValue)) {
+                        alert("Bitte geben Sie eine gültige Wagennummer ein.");
+                        return;
+                    }
+
+                    userAnswers.push(formattedValue);
+                    currentQuestion++;
+                    showQuestion(currentQuestion);
+                };
+
+                allInputs.forEach(input => {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            submitButton.click();
+                        }
+                    });
+                });
+
+                answersDiv.appendChild(submitButton);
+            } else {
+                // Original input handling for question 3 (location)
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Antwort hier';
+                input.id = 'manualAnswer';
+                answersDiv.appendChild(input);
+
+                const submitButton = createSubmitButton();
+                submitButton.onclick = () => {
+                    const manualAnswer = input.value;
+                    if (!validateLocationQuestionInput(manualAnswer)) {
+                        alert("Bitte geben Sie eine gültige Antwort ein. Die Antwort besteht nur aus Buchstaben!");
+                        return;
+                    }
+
+                    if (manualAnswer) {
+                        userAnswers.push(manualAnswer);
+                        currentQuestion++;
+                        showQuestion(currentQuestion);
+                    }
+                };
+
+                answersDiv.appendChild(submitButton);
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        submitButton.click();
+                    }
+                });
+            }
         }
     });
 
     containerDiv.appendChild(answersDiv);
 }
 
-function createSortableQuestion(containerDiv, question) {
-    const list = document.createElement('ul');
-    list.className = 'collection';
-
-    question.answers.forEach(answer => {
-        const item = document.createElement('li');
-        item.className = 'collection-item';
-        item.draggable = true;
-        item.textContent = answer;
-        list.appendChild(item);
-    });
-
-    setupDragAndDrop(list);
-
+// Helper function to create consistently styled submit buttons
+function createSubmitButton() {
     const submitButton = document.createElement('button');
-    submitButton.className = 'waves-effect waves-light btn';
-    submitButton.textContent = 'Weiter';
-    submitButton.onclick = () => {
-        const sortedAnswers = Array.from(list.children).map(item => item.textContent);
-        userAnswers.push(sortedAnswers);
-        currentQuestion++;
-        showQuestion(currentQuestion);
-    };
+    submitButton.className = 'waves-effect waves-light btn-large';
+    submitButton.style.display = 'block';
+    submitButton.style.marginBottom = '10px';
+    submitButton.style.color = "white";
+    submitButton.style.backgroundColor = "red";
+    submitButton.textContent = 'Antwort senden';
 
-    containerDiv.appendChild(list);
-    containerDiv.appendChild(submitButton);
-
-    // Add event listener for Enter key
-    submitButton.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            submitButton.click();
-        }
-    });
-}
-
-function setupDragAndDrop(list) {
-    let draggedItem = null;
-
-    list.addEventListener('dragstart', function(e) {
-        draggedItem = e.target;
-        setTimeout(() => e.target.style.opacity = '0.5', 0);
+    submitButton.addEventListener('mouseover', () => {
+        submitButton.style.backgroundColor = '#c82333';
     });
 
-    list.addEventListener('dragend', function(e) {
-        setTimeout(() => e.target.style.opacity = '1', 0);
+    submitButton.addEventListener('mouseout', () => {
+        submitButton.style.backgroundColor = '#dc3545';
     });
 
-    list.addEventListener('dragover', function(e) {
-        e.preventDefault();
-    });
-
-    list.addEventListener('drop', function(e) {
-        e.preventDefault();
-        const target = e.target;
-        if (target.className === 'collection-item' && target !== draggedItem) {
-            const allItems = [...list.children];
-            const draggedIdx = allItems.indexOf(draggedItem);
-            const droppedIdx = allItems.indexOf(target);
-
-            if (draggedIdx < droppedIdx) {
-                target.parentNode.insertBefore(draggedItem, target.nextSibling);
-            } else {
-                target.parentNode.insertBefore(draggedItem, target);
-            }
-        }
-    });
+    return submitButton;
 }
 
 function showResponseForm() {
     document.getElementById('quiz-container').classList.add('hidden');
     document.getElementById('responseForm').classList.remove('hidden');
-    
-    // Directly show answers
+
     const messageElement = document.getElementById('message');
     messageElement.value = formatQuizResponses();
-    messageElement.setAttribute('readonly', true); // Make the textarea readonly
+    messageElement.setAttribute('readonly', true);
     Materialize.updateTextFields();
 }
 
@@ -289,10 +559,9 @@ function formatQuizResponses() {
     return response;
 }
 
-// CRUD Operations
 function handleSubmit(e) {
     e.preventDefault();
-    
+
     const fullName = document.getElementById('fullName');
     const message = document.getElementById('message');
     const comment = document.getElementById('comment');
@@ -334,21 +603,8 @@ function showThankYouMessage() {
     `;
 }
 
-function showError(message, questionId) {
-    const errorMessageDiv = document.getElementById(`error-message-${questionId}`);
-    errorMessageDiv.innerHTML = `<b>${message}</b><br>`;
-    errorMessageDiv.classList.remove('hidden');
-    errorMessageDiv.style.color = 'red'; // Ensure the color is set to red
-    errorMessageDiv.classList.add('error-message'); // Add class for consistent styling
-}
-
-function hideError(questionId) {
-    const errorMessageDiv = document.getElementById(`error-message-${questionId}`);
-    errorMessageDiv.classList.add('hidden');
-}
-
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setupEventHandlers();
     showQuestion(currentQuestion);
 });
