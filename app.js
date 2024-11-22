@@ -350,7 +350,7 @@ function createRegularQuestion(containerDiv, question) {
                 const inputSections = [
                     { group: 2, separator: ' ' },   // 50
                     { group: 2, separator: ' ' },   // 85
-                    { group: 2, separator: '-' },   // 26
+                    { group: 2, separator: '' },   // 26
                     { group: 2, separator: ' ' },   // 94
                     { group: 3, separator: '-' },   // 901
                     { group: 1, separator: '' }     // 3
