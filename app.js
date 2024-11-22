@@ -23,7 +23,7 @@ const responsesRef = ref(db, 'responses');
 const questions = [
     {
         id: 1,
-        text: "In welchem Umlauf hat sich ein Defekt ereignet? (z.B.: 712-1)",
+        text: "In welchem Umlauf hat sich ein Defekt ereignet? (z.B.: 712-(0)1)",
         type: "regular",
         answers: [
             "Manuell eingeben"
@@ -103,7 +103,7 @@ function showQuestion(questionIndex) {
 }
 
 function validateCirculationQuestionInput(input) {
-    const regex = /^\d{3}-[1-4]$/;
+    const regex = /^\d{3}-\d{2}$/;
     return regex.test(input);
 }
 
@@ -113,9 +113,10 @@ function validateWagonNumberQuestionInput(input) {
 }
 
 function validateLocationQuestionInput(input) {
-    const regex = /^[A-Za-z\s]+$/;
+    const regex = /^[a-zA-ZöÖüÜäÄ]+$/;
     return regex.test(input) && input.trim() !== "";
 }
+
 
 function createRegularQuestion(containerDiv, question) {
     const answersDiv = document.createElement('div');
@@ -154,14 +155,14 @@ function createRegularQuestion(containerDiv, question) {
 
                 // Function to get next input element
                 const getNextInput = (currentInput) => {
-                    const allInputs = [...firstThreeDigits.querySelectorAll('input'), lastDigit];
+                    const allInputs = [...firstThreeDigits.querySelectorAll('input'), ...lastDigits.querySelectorAll('input')];
                     const currentIndex = allInputs.indexOf(currentInput);
                     return allInputs[currentIndex + 1];
                 };
 
                 // Function to get previous input element
                 const getPrevInput = (currentInput) => {
-                    const allInputs = [...firstThreeDigits.querySelectorAll('input'), lastDigit];
+                    const allInputs = [...firstThreeDigits.querySelectorAll('input'), ...lastDigits.querySelectorAll('input')];
                     const currentIndex = allInputs.indexOf(currentInput);
                     return allInputs[currentIndex - 1];
                 };
@@ -242,68 +243,92 @@ function createRegularQuestion(containerDiv, question) {
                 dash.style.color = '#495057';
                 dash.style.margin = '0 4px';
 
-                const lastDigit = document.createElement('input');
-                lastDigit.type = 'text';
-                lastDigit.maxLength = 1;
-                lastDigit.className = 'digit-input';
-                lastDigit.inputMode = 'numeric';
-                Object.assign(lastDigit.style, inputStyle);
+                const lastDigits = document.createElement('div');
+                lastDigits.style.display = 'flex';
+                lastDigits.style.gap = '8px';
 
-                lastDigit.addEventListener('focus', () => {
-                    lastDigit.style.borderColor = '#007bff';
-                    lastDigit.select();
-                });
+                // Create last two inputs
+                for (let i = 0; i < 2; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    input.className = 'digit-input';
+                    input.inputMode = 'numeric';
+                    Object.assign(input.style, inputStyle);
 
-                lastDigit.addEventListener('blur', () => {
-                    lastDigit.style.borderColor = '#dee2e6';
-                });
+                    input.addEventListener('focus', () => {
+                        input.style.borderColor = '#007bff';
+                        input.select();
+                    });
 
-                lastDigit.addEventListener('input', (e) => {
-                    let value = e.target.value.replace(/[^1-4]/g, '');
-                    e.target.value = value;
-                });
+                    input.addEventListener('blur', () => {
+                        input.style.borderColor = '#dee2e6';
+                    });
 
-                lastDigit.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace') {
-                        if (e.target.value === '') {
+                    input.addEventListener('input', (e) => {
+                        let value = e.target.value.replace(/[^0-9]/g, '');
+                        e.target.value = value;
+
+                        if (value.length === 1) {
+                            const nextInput = getNextInput(e.target);
+                            if (nextInput) {
+                                nextInput.focus();
+                            }
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace') {
+                            if (e.target.value === '') {
+                                const prevInput = getPrevInput(e.target);
+                                if (prevInput) {
+                                    prevInput.focus();
+                                    prevInput.value = '';
+                                    e.preventDefault();
+                                }
+                            }
+                        } else if (e.key === 'ArrowLeft') {
                             const prevInput = getPrevInput(e.target);
                             if (prevInput) {
                                 prevInput.focus();
-                                prevInput.value = '';
+                                e.preventDefault();
+                            }
+                        } else if (e.key === 'ArrowRight') {
+                            const nextInput = getNextInput(e.target);
+                            if (nextInput) {
+                                nextInput.focus();
                                 e.preventDefault();
                             }
                         }
-                    } else if (e.key === 'ArrowLeft') {
-                        const prevInput = getPrevInput(e.target);
-                        if (prevInput) {
-                            prevInput.focus();
-                            e.preventDefault();
-                        }
-                    }
-                });
+                    });
 
-                lastDigit.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                    const numericValue = pastedText.replace(/[^1-4]/g, '');
-                    if (numericValue.length > 0) {
-                        lastDigit.value = numericValue[0];
-                    }
-                });
+                    input.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                        const numericValue = pastedText.replace(/[^0-9]/g, '');
+                        if (numericValue.length > 0) {
+                            input.value = numericValue[0];
+                            const nextInput = getNextInput(input);
+                            if (nextInput) nextInput.focus();
+                        }
+                    });
+
+                    lastDigits.appendChild(input);
+                }
 
                 inputGroup.appendChild(firstThreeDigits);
                 inputGroup.appendChild(dash);
-                inputGroup.appendChild(lastDigit);
+                inputGroup.appendChild(lastDigits);
                 answersDiv.appendChild(inputGroup);
 
                 const submitButton = createSubmitButton();
                 submitButton.onclick = () => {
                     const digits = Array.from(firstThreeDigits.querySelectorAll('input')).map(input => input.value);
-                    const lastValue = lastDigit.value;
-                    const fullValue = `${digits.join('')}-${lastValue}`;
+                    const lastValues = Array.from(lastDigits.querySelectorAll('input')).map(input => input.value);
+                    const fullValue = `${digits.join('')}-${lastValues.join('')}`;
 
                     if (!validateCirculationQuestionInput(fullValue)) {
-                        alert('Bitte geben Sie eine gültige Antwort ein. Die ersten drei Felder müssen Zahlen sein, und das letzte Feld muss 1, 2, 3 oder 4 sein.');
+                        alert('Bitte geben Sie eine gültige Antwort ein. Alle Felder müssen Zahlen sein.');
                         return;
                     }
 
@@ -312,7 +337,7 @@ function createRegularQuestion(containerDiv, question) {
                     showQuestion(currentQuestion);
                 };
 
-                const allInputs = [...firstThreeDigits.querySelectorAll('input'), lastDigit];
+                const allInputs = [...firstThreeDigits.querySelectorAll('input'), ...lastDigits.querySelectorAll('input')];
                 allInputs.forEach(input => {
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter') {
