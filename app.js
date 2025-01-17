@@ -132,6 +132,8 @@ function createRegularQuestion(containerDiv, question) {
                 inputGroup.style.alignItems = 'center';
                 inputGroup.style.gap = '8px';
                 inputGroup.style.marginBottom = '20px';
+                inputGroup.style.flexWrap = 'wrap'; // Make the input group responsive
+                inputGroup.style.maxWidth = '700px'; // Allow more boxes on one line
 
                 // Create three boxes for first three digits
                 const firstThreeDigits = document.createElement('div');
@@ -355,6 +357,7 @@ function createRegularQuestion(containerDiv, question) {
                 inputGroup.style.alignItems = 'center';
                 inputGroup.style.gap = '8px';
                 inputGroup.style.marginBottom = '20px';
+                inputGroup.style.flexWrap = 'wrap'; // Make the input group responsive
 
                 // Common input styles
                 const inputStyle = {

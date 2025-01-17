@@ -66,6 +66,33 @@
     .hidden {
       display: none;
     }
+
+      /* Media query for larger screens */
+      @media (min-width: 600px) {
+        .input-group {
+            gap: 8px;
+        }
+        .digit-input {
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+        }
+    }
+
+    /* Media query for even larger screens */
+    @media (min-width: 900px) {
+        .container {
+            max-width: 1000px;
+        }
+        .input-group {
+            gap: 16px;
+        }
+        .digit-input {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+        }
+    }
   </style>
 </head>
 <body>
