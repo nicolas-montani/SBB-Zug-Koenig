@@ -14,12 +14,12 @@ const firebaseConfig = {
     measurementId: "G-PQY92PKZG6"
 };
 
-// Initialize Firebase
+// Initialize Firebase and set up the database reference
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const responsesRef = ref(db, 'responses');
 
-// Quiz Questions
+// Array of quiz questions with details
 const questions = [
     {
         id: 1,
@@ -55,8 +55,8 @@ const questions = [
     },
 ];
 
-let currentQuestion = 0;
-let userAnswers = [];
+let currentQuestion = 0; // Tracks the current question being displayed
+let userAnswers = []; // Stores user responses
 
 // Event Handlers Setup
 function setupEventHandlers() {
@@ -64,12 +64,13 @@ function setupEventHandlers() {
     responseForm.addEventListener("submit", handleSubmit);
 }
 
-// Quiz Functions
+// Displays a specific question based on its index
 function showQuestion(questionIndex) {
     const container = document.getElementById('question-container');
     const progressDiv = document.getElementById('progress');
     let progressBar = document.querySelector('.progress-bar');
 
+    // Updates or creates a progress bar
     if (!progressBar) {
         progressBar = document.createElement('div');
         progressBar.className = 'progress-bar';
@@ -78,13 +79,15 @@ function showQuestion(questionIndex) {
 
     progressBar.style.width = `${(questionIndex / questions.length) * 100}%`;
 
-    container.innerHTML = '';
+    container.innerHTML = ''; // Clear previous content
 
+    // Check if all questions are answered
     if (questionIndex >= questions.length) {
         showResponseForm();
         return;
     }
 
+    // Create and display the current question
     const question = questions[questionIndex];
     const questionDiv = document.createElement('div');
     questionDiv.className = 'question';
@@ -93,6 +96,7 @@ function showQuestion(questionIndex) {
     questionTitle.textContent = question.text;
     questionDiv.appendChild(questionTitle);
 
+    // Decide the type of input needed for the question
     if (question.type === "sortable") {
         createSortableQuestion(questionDiv, question);
     } else {
@@ -102,26 +106,30 @@ function showQuestion(questionIndex) {
     container.appendChild(questionDiv);
 }
 
+// Validates user input for circulation numbers
 function validateCirculationQuestionInput(input) {
     const regex = /^\d{3}-\d{2}$/;
     return regex.test(input);
 }
 
+// Validates user input for wagon numbers
 function validateWagonNumberQuestionInput(input) {
     const regex = /^\d{2} \d{2} \d{2}-\d{2} \d{3}-\d$/;
     return regex.test(input);
 }
 
+// Validates location inputs (letters only)
 function validateLocationQuestionInput(input) {
     const regex = /^[a-zA-ZöÖüÜäÄ]+$/;
     return regex.test(input) && input.trim() !== "";
 }
 
-
+// Creates regular input fields for questions
 function createRegularQuestion(containerDiv, question) {
     const answersDiv = document.createElement('div');
     answersDiv.className = 'answers';
 
+    // Handle manual entry for different question types
     question.answers.forEach(answer => {
         if (answer === "Manuell eingeben") {
             if (question.id === 1) {
@@ -132,6 +140,8 @@ function createRegularQuestion(containerDiv, question) {
                 inputGroup.style.alignItems = 'center';
                 inputGroup.style.gap = '8px';
                 inputGroup.style.marginBottom = '20px';
+                inputGroup.style.flexWrap = 'wrap'; // Make the input group responsive
+                inputGroup.style.maxWidth = '700px'; // Allow more boxes on one line
 
                 // Create three boxes for first three digits
                 const firstThreeDigits = document.createElement('div');
@@ -355,6 +365,7 @@ function createRegularQuestion(containerDiv, question) {
                 inputGroup.style.alignItems = 'center';
                 inputGroup.style.gap = '8px';
                 inputGroup.style.marginBottom = '20px';
+                inputGroup.style.flexWrap = 'wrap'; // Make the input group responsive
 
                 // Common input styles
                 const inputStyle = {
@@ -505,7 +516,7 @@ function createRegularQuestion(containerDiv, question) {
 
                 answersDiv.appendChild(submitButton);
             } else {
-                // Original input handling for question 3 (location)
+                // Handle simple text input for location or other fields
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.placeholder = 'Antwort hier';
@@ -541,7 +552,7 @@ function createRegularQuestion(containerDiv, question) {
     containerDiv.appendChild(answersDiv);
 }
 
-// Helper function to create consistently styled submit buttons
+// Creates a submit button with styles and events
 function createSubmitButton() {
     const submitButton = document.createElement('button');
     submitButton.className = 'waves-effect waves-light btn-large';
@@ -562,6 +573,7 @@ function createSubmitButton() {
     return submitButton;
 }
 
+// Displays a summary of user responses at the end
 function showResponseForm() {
     document.getElementById('quiz-container').classList.add('hidden');
     document.getElementById('responseForm').classList.remove('hidden');
@@ -572,6 +584,7 @@ function showResponseForm() {
     Materialize.updateTextFields();
 }
 
+// Formats user responses into readable text
 function formatQuizResponses() {
     let response = "";
     questions.forEach((question, index) => {
@@ -584,6 +597,7 @@ function formatQuizResponses() {
     return response;
 }
 
+// Handles form submission, saves responses to Firebase
 function handleSubmit(e) {
     e.preventDefault();
 
@@ -610,6 +624,7 @@ function handleSubmit(e) {
     });
 }
 
+// Clears form fields after submission
 function clearForm() {
     document.getElementById('fullName').value = "";
     document.getElementById('message').value = "";
@@ -617,6 +632,7 @@ function clearForm() {
     document.getElementById('hiddenId').value = "";
 }
 
+// Shows a thank-you message after form submission
 function showThankYouMessage() {
     const container = document.getElementById('responseForm');
     container.innerHTML = `
@@ -628,7 +644,7 @@ function showThankYouMessage() {
     `;
 }
 
-// Initialize
+// Initialize event listeners and the first question on page load
 document.addEventListener('DOMContentLoaded', function () {
     setupEventHandlers();
     showQuestion(currentQuestion);

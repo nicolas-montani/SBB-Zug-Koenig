@@ -4,22 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SBB Zug König</title>
+  <!-- Importing Materialize CSS for styling -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
- <style>
+  <style>
+    /* Container styling */
     .container {
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
     }
+    /* Question box styling */
     .question {
       margin-bottom: 20px;
       padding: 15px;
       border-radius: 5px;
       background-color: #f8f9fa;
     }
+    /* Answer options styling */
     .answers {
       margin-bottom: 10px;
     }
+    /* Progress bar styling */
     .progress {
       margin-bottom: 20px;
       background-color: rgba(128, 128, 128, 0.5); 
@@ -33,25 +38,29 @@
       width: 0;
       transition: width 0.3s ease;
     }
+    /* Completion message styling */
     .completion-message {
       text-align: center;
       font-size: 24px;
       color: #E30007;
       margin: 40px 0;
     }
+    /* Hidden class for hiding elements */
     .hidden {
       display: none;
     }
+    /* Submit button styling */
     .submitButton {
       background-color: #E30007 !important;
     }
+    /* Red button styling */
     .red-button {
       background-color: #E30007 !important;
       display: block;
       margin-bottom: 10px;
       color: white;
-
     }
+    /* Error message styling */
     #error-message {
       color: red;
       font-weight: bold;
@@ -59,17 +68,40 @@
       margin-top: 20px;
     }
     .error-message {
-    margin-top: 10px; 
-    margin-bottom: 25px; 
-    color: red;
-}
-    .hidden {
-      display: none;
+      margin-top: 10px; 
+      margin-bottom: 25px; 
+      color: red;
+    }
+    /* Media query for larger screens */
+    @media (min-width: 600px) {
+      .input-group {
+        gap: 8px;
+      }
+      .digit-input {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+      }
+    }
+    /* Media query for even larger screens */
+    @media (min-width: 900px) {
+      .container {
+        max-width: 1000px;
+      }
+      .input-group {
+        gap: 16px;
+      }
+      .digit-input {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 <body>
   <div class='container'>
+    <!-- Header with logo -->
     <div class='header'>
       <img src="SBB-Logo.png" width="100%" alt="">
     </div>
@@ -80,7 +112,7 @@
       <div id="question-container"></div>
     </div>
 
-    <!-- Response Form (Initially Hidden) -->
+    <!-- Response Form -->
     <form id='responseForm' class="hidden">
       <input type="hidden" id='hiddenId' />     
       <div class="input-field">
@@ -109,6 +141,7 @@
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
  
+  <!-- Main JavaScript file -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

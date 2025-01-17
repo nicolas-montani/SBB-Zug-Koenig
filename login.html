@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <!-- Importing Materialize CSS for styling -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 </head>
 <body>
@@ -16,6 +17,7 @@
 
     <div class="container">
         <h3>Login</h3>
+        <!-- Login Form -->
         <form id="loginForm">
             <div class="input-field">
                 <input type="text" id="username" required>
@@ -29,19 +31,21 @@
         </form>
     </div>
 
+    <!-- Importing Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             M.updateTextFields();
         });
 
+        // Handle login form submission
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Simple authentication logic (replace with real authentication)
-            if (username === 'admin' && password === 'milnico') {
+            // Simple authentication logic for showcasing purposes
+            if (username === 'admin' && password === 'admin') {
                 localStorage.setItem('authenticated', 'true');
                 window.location.href = 'dashboard.html';
             } else {

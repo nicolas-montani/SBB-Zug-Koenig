@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SBB Zug König - Dashboard</title>
+    <!-- Importing Materialize CSS for styling -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -26,6 +27,7 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <nav class="red">
         <div class="nav-wrapper container">
             <a href="#" class="brand-logo">SBB Zug König Dashboard</a>
@@ -48,10 +50,11 @@
     </ul>
 
     <div class="container">
+        <!-- Statistics Row -->
         <div class="row" id="statsRow">
-            <!-- Stats cards will be inserted here -->
         </div>
 
+        <!-- Search Input -->
         <div class="row">
             <div class="col s12">
                 <div class="input-field">
@@ -61,11 +64,12 @@
             </div>
         </div>
 
+        <!-- Responses Container -->
         <div id="responsesContainer">
-            <!-- Responses will be inserted here -->
         </div>
     </div>
 
+    <!-- Importing Materialize JS and Dashboard JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script type="module" src="dashboard.js"></script>
     <script>
