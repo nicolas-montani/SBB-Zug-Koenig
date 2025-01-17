@@ -34,6 +34,7 @@ onValue(responsesRef, (snapshot) => {
     }
 });
 
+// Update statistics on the dashboard
 function updateStats() {
     const stats = {
         totalResponses: allResponses.length,
@@ -71,12 +72,12 @@ function updateStats() {
     `;
 }
 
+// Calculate average response time (dummy function)
 function calculateAverageResponseTime() {
-    // This is a placeholder - in a real application, you would calculate this
-    // based on the timestamp differences between questions
-    return "~5";
+    return "~2";
 }
 
+// Update the dashboard with responses
 function updateDashboard() {
     const container = document.getElementById('responsesContainer');
     container.innerHTML = '';
@@ -91,6 +92,7 @@ function updateDashboard() {
     });
 }
 
+// Create a response card element
 function createResponseCard(response) {
     const div = document.createElement('div');
     div.className = 'card dashboard-card';
@@ -114,6 +116,7 @@ function createResponseCard(response) {
     return div;
 }
 
+// Filter responses based on search input
 window.filterResponses = function() {
     const searchText = document.getElementById('searchInput').value.toLowerCase();
     const container = document.getElementById('responsesContainer');

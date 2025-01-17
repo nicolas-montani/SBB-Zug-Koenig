@@ -58,6 +58,7 @@
 </head>
 <body>
     <script>
+        // Redirect to login if not authenticated
         if (localStorage.getItem('authenticated') !== 'true') {
             window.location.href = 'login.html';
         }

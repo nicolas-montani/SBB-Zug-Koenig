@@ -1,12 +1,18 @@
-{  "rules": {
+{
+  "rules": {
+    // Allow read access to the database
     ".read": true,
+    // Allow write access to the database
     ".write": true,
-	"reviews": {   
-    "$node_id": {
-       ".validate": "newData.hasChildren(['fullName', 'message'])
-      &&	newData.child('fullName').isString() && newData.child('fullName').val().length < 4
-      && newData.child('message').isString() && newData.child('message').val().length < 100"
-      }  
-  	}   	
+    "reviews": {
+      "$node_id": {
+        // Validate that new data has 'fullName' and 'message' fields
+        ".validate": "newData.hasChildren(['fullName', 'message'])
+        // Ensure 'fullName' is a string and less than 4 characters
+        && newData.child('fullName').isString() && newData.child('fullName').val().length < 4
+        // Ensure 'message' is a string and less than 100 characters
+        && newData.child('message').isString() && newData.child('message').val().length < 100"
+      }
+    }
   }
 }
