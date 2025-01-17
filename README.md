@@ -14,7 +14,7 @@
 ## Technologie-Stack
 
 - Frontend: HTML, JavaScript, Materialize CSS, Chart.js, Leaflet
-- Backend: Firebase Realtime Database zur Speicherung der Antworten
+- Backend: Firebase Realtime Database zur Speicherung der Antworten, JavaScript
 
 ## Installation und Nutzung
 
@@ -28,7 +28,7 @@ Um die App zu nutzen, einfach dem folgenden Link folgen und die Fragen direkt im
 - **Mobile App**: Entwicklung einer mobilen Version der App für iOS und Android, um den Zugriff und die Nutzung zu erleichtern.
 - **Mehrsprachigkeit**: Unterstützung für mehrere Sprachen, um die App für ein breiteres Publikum zugänglich zu machen.
 - **Benachrichtigungen**: Implementierung von Push-Benachrichtigungen, um Nutzer über neue Fragen oder wichtige Updates zu informieren.
-- **Integration mit anderen Systemen**: Anbindung an bestehende Unternehmenssysteme zur automatischen Synchronisation von Daten und Prozessen.
+- **Integration mit anderen Systemen**: Anbindung an bestehende Unternehmenssysteme zur automatischen Synchronisation von Daten und Prozessen wie beispielsweise die Verbindung mit der SBB API.
 - **Erweiterte Sicherheitsfunktionen**: Implementierung von Zwei-Faktor-Authentifizierung und erweiterten Zugriffskontrollen, um die Sicherheit der Daten zu gewährleisten.
 
 ## Autoren und Kontakt
