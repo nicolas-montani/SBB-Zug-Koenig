@@ -35,7 +35,7 @@ Um die App zu nutzen, einfach dem folgenden Link folgen und die Fragen direkt im
 
 - **Milan Milenkovic**  
   - GitHub: [mimienco](https://github.com/mimienco)  
-  - E-Mail: [Milan.milenkovic121@gmail.com](mailto:Milan.milenkovic121@gmail.com)
+  - E-Mail: [Milan.milenkovic121@gmail.com](mailto:milan.milenkovic121@gmail.com)
   
 - **Nicolas Montani**  
   - GitHub: [nicolas-montani](https://github.com/nicolas-montani)  
